@@ -23,7 +23,7 @@
 # FLAGS
 #	-a, --arch <arch>	Specify the target architecture, mandatory when patching.
 #
-#	-g, --gadget-conf <json_file>	
+#	-g, --gadget-conf <json_file>
 #				Specify a frida-gadget configuration file, optional when patching.
 #
 #	-n, --net		Add a permissing network security config when building, optional.
@@ -75,9 +75,9 @@ install_buildtools(){
 	CMDLINE_TOOLS_DIR="$APK_SH_HOME/cmdline-tools"
 	if [ ! -d "$CMDLINE_TOOLS_DIR" ]; then
 		echo "[>] Downloading Android commandline tools from $CMDLINE_TOOLS_DOWNLOAD_URL"
-		wget $CMDLINE_TOOLS_DOWNLOAD_URL -q --show-progress -P $APK_SH_HOME 
+		wget $CMDLINE_TOOLS_DOWNLOAD_URL -q --show-progress -P $APK_SH_HOME
 		unzip $APK_SH_HOME/commandlinetools-linux-9123335_latest.zip -d $APK_SH_HOME
-		rm $APK_SH_HOME/commandlinetools-linux-9123335_latest.zip 
+		rm $APK_SH_HOME/commandlinetools-linux-9123335_latest.zip
 	fi
 	SDK_MANAGER_BIN="$CMDLINE_TOOLS_DIR/bin/sdkmanager"
 	mkdir -p $SDK_ROOT
@@ -99,7 +99,7 @@ check_apk_tools(){
 		APKTOOL_DOWNLOAD_URL=$APKTOOL_DOWNLOAD_URL_GH
 		echo "[!] No apktool v$APKTOOL_VER found!"
 		echo "[>] Downloading apktool from $APKTOOL_DOWNLOAD_URL"
-		wget $APKTOOL_DOWNLOAD_URL -q --show-progress -P $APK_SH_HOME 
+		wget $APKTOOL_DOWNLOAD_URL -q --show-progress -P $APK_SH_HOME
 	fi
 	if  is_not_installed 'apksigner'; then
 		if [ ! -f "$APKSIGNER" ]; then
@@ -239,9 +239,9 @@ apk_patch(){
 	#  folder:arch
 	#  'armeabi': 'arm',
 	#  'armeabi-v7a': 'arm',
-    #  'arm64': 'arm64',
-    #  'arm64-v8a': 'arm64',
-    #  'x86': 'x86',
+	#  'arm64': 'arm64',
+	#  'arm64-v8a': 'arm64',
+	#  'x86': 'x86',
 	#  'x86_64': 'x86_64',
 
 	echo -e "[>] \033[1mPatching $APK_NAME injecting gadget for $ARCH...\033[0m"
@@ -267,7 +267,7 @@ apk_patch(){
 		if [ ! -f "$FRIDA_SO_XZ" ]; then
 			echo "[!] Frida gadget not present in $APK_SH_HOME"
 			echo "[>] Downloading latest frida gadget for $ARCH from github.com..."
-			wget https://github.com/frida/frida/releases/download/$GADGET_VER/$GADGET -q --show-progress -P $APK_SH_HOME 
+			wget https://github.com/frida/frida/releases/download/$GADGET_VER/$GADGET -q --show-progress -P $APK_SH_HOME
 		fi
 		unxz "$FRIDA_SO_XZ"
 	else
@@ -302,10 +302,10 @@ apk_patch(){
 	CLASS_PATH="./$APK_DIR/smali/$MAIN_ACTIVITY_2PATH.smali"
 	echo "[>] Local path should be $CLASS_PATH"
 	# NOTE: if the class does not exist it might be a multidex setup.
-	# Search the class in smali_classesN directories. 
+	# Search the class in smali_classesN directories.
 	CLASS_PATH_IND=1 # starts from 2
 	# get max number of smali_classes
-    CLASS_PATH_IND_MAX=$(ls -1 "./$APK_DIR" | grep "_classes[0-9]*" | wc -l)
+	CLASS_PATH_IND_MAX=$(ls -1 "./$APK_DIR" | grep "_classes[0-9]*" | wc -l)
 	while [ ! -f "$CLASS_PATH" ]
 	do
 		echo "[!] $CLASS_PATH does not exist! Probably a multidex APK..."
@@ -322,9 +322,9 @@ apk_patch(){
 		CLASS_PATH="./$APK_DIR/smali_classes$CLASS_PATH_IND/$MAIN_ACTIVITY_2PATH.smali"
 		echo "[?] Looking in $CLASS_PATH..."
 	done
-	
+
 	#
-	# Now, patch the smali, look for the line with the apktool's comment "# direct methods" 
+	# Now, patch the smali, look for the line with the apktool's comment "# direct methods"
 	# Patch the smali with the appropriate loadLibrary call based on wether a constructor already exists or not.
 	# If an existing constructor is present, the partial_load_library will be used.
 	# If no constructor is present, the full_load_library will be used.
@@ -369,7 +369,7 @@ apk_patch(){
 				arr+=( 'const-string v0, "frida-gadget"')
 				arr+=( 'invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V')
 				arr+=( "${lines[@]:$index+1+$skip}" ) 		# tail of the array
-        		lines=("${arr[@]}")     					# transfer back in the original array.
+				lines=("${arr[@]}")	 					# transfer back in the original array.
 			else
 				echo "[!!!!!!] No constructor found!"
 				echo "[!!!!!!] TODO: gonna use the full load library"
@@ -389,7 +389,7 @@ apk_patch(){
 	done
 	echo "[>] Writing the pathced smali back..."
 	printf "%s\n" "${lines[@]}" > $CLASS_PATH
-	
+
 	# Add the Internet permission to the manifest if it’s not there already, to permit Frida gadget to open a socket.
 	echo "[?] Checking if Internet permission is present in the manifest..."
 	INTERNET_PERMISSION=0
@@ -409,7 +409,7 @@ apk_patch(){
 		arr=("${manifest[@]:0:1}") 			# start of the array
 		arr+=( '<uses-permission android:name="android.permission.INTERNET"/>')
 		arr+=( "${manifest[@]:1}" ) 		# tail of the array
-        manifest=("${arr[@]}")     		# transfer back in the original array.
+		manifest=("${arr[@]}")	 		# transfer back in the original array.
 		echo "[>] Writing the patched manifest back..."
 		printf "%s\n" "${manifest[@]}" > $MANIFEST_PATH
 	fi
@@ -441,7 +441,7 @@ apk_pull(){
 	NUM_APK=`echo "$PACKAGE_PATH" | wc -l`
 	if [ $NUM_APK -gt 1 ]; then
 		SPLIT_DIR=$PACKAGE"_split_apks"
-		mkdir -p $SPLIT_DIR 
+		mkdir -p $SPLIT_DIR
 		echo "[>] Pulling $PACKAGE: Split apks detected!"
 		echo "[>] Pulling $NUM_APK apks in ./$SPLIT_DIR/"
 		print_ "[>] Pulling $PACKAGE from $PACKAGE_PATH<<<"
@@ -451,7 +451,7 @@ apk_pull(){
 			PULL_CMD="adb pull $P $SPLIT_DIR"
 			run "$PULL_CMD"
 		done
-		# We have to combine split APKs into a single APK, for patching. 
+		# We have to combine split APKs into a single APK, for patching.
 		# Decode all the APKs.
 		echo "[>] Combining split APKs into a single APK..."
 		SPLIT_APKS=($SPLIT_DIR/*)
@@ -463,7 +463,7 @@ apk_pull(){
 			APKTOOL_DECODE_OPTS="-o $APK_DIR 1>/dev/null"
 			apk_decode "$APK_NAME" "$APKTOOL_DECODE_OPTS"
 		done
-		# Walk the extracted APKs dirs and copy files and dirs to the base APK dir. 
+		# Walk the extracted APKs dirs and copy files and dirs to the base APK dir.
 		echo "[>] Walking extracted APKs dirs and copying files to the base APK..."
 		for i in "${SPLIT_APKS[@]}"
 		do
@@ -487,7 +487,7 @@ apk_pull(){
 				# Copy files into the base APK, except for XML files in the res directory
 				if [[ $j == */res ]]; then
 					print_ "[.] /res direcorty found!":
-					(cd $j; find . -type f ! -name '*.xml' -exec cp --parents {} ../../base/res/ \;)# -exec echo '[+] Copying res that are not xml {}'\;)    
+					(cd $j; find . -type f ! -name '*.xml' -exec cp --parents {} ../../base/res/ \;)# -exec echo '[+] Copying res that are not xml {}'\;)
 					continue
 				fi
 				print_ "[>] Copying directory cp -R $j in $SPLIT_DIR/base/ ...."
@@ -495,7 +495,7 @@ apk_pull(){
 			done
 		done
 		echo "[>] Fixing APKTOOL_DUMMY public resource identifiers..."
-		# Fix public resource identifiers. 
+		# Fix public resource identifiers.
 		# Find all resource IDs with name APKTOOOL_DUMMY_xxx in the base dir
 		DUMMY_IDS=`grep -r "APKTOOL_DUMMY_" $SPLIT_DIR"/base" | grep -Po "id=\"\K.*?(?=\")" | grep 0x`
 		stra=($DUMMY_IDS)
@@ -513,12 +513,12 @@ apk_pull(){
 			#grep -r "\<$DUMMY_NAME\>" $SPLIT_DIR"/base" | grep "\.xml:"
 			grep -r "\<$DUMMY_NAME\>" $SPLIT_DIR"/base" | grep "\.xml:" | cut -d ":" -f 1 | xargs sed -i "s/\<$DUMMY_NAME\>/$REAL_NAME/g"
 			print_ "[~] Updated line:"
-			#grep -r "\<$REAL_NAME\>" $SPLIT_DIR"/base" | grep "\.xml:" 
+			#grep -r "\<$REAL_NAME\>" $SPLIT_DIR"/base" | grep "\.xml:"
 			print_ "---"
 		done
 		echo "[>] Done!"
 
-		# Disable APK splitting in the base manifest file, if it’s not there already done.        
+		# Disable APK splitting in the base manifest file, if it’s not there already done.
 		MANIFEST_PATH="$SPLIT_DIR/base/AndroidManifest.xml"
 		echo "[>] Disabling APK splitting (isSplitRequired=false) if it was set to true..."
 		sed -i "s/android:isSplitRequired=\"true\"/android:isSplitRequired=\"false\"/g" $MANIFEST_PATH
@@ -529,7 +529,7 @@ apk_pull(){
 		# If the tag exist and is set to false, set it to true, otherwise do nothing
 		sed -i "s/android:extractNativeLibs=\"false\"/android:extractNativeLibs=\"true\"/g" $MANIFEST_PATH
 		echo "[>] Done!"
-		# Rebuild the base APK 
+		# Rebuild the base APK
 		APKTOOL_BUILD_OPTS="-o file.single.apk --use-aapt2"
 		APKTOOL_BUILD_OPTS="$APKTOOL_BUILD_OPTS $BUILD_OPTS"
 		apk_build "$SPLIT_DIR/base" "$APKTOOL_BUILD_OPTS"
@@ -568,19 +568,19 @@ apk_rename(){
 #####################################################################
 #####################################################################
 
-check_apk_tools 
+check_apk_tools
 
 if [ ! -z $1 ]&&[ $1 == "build" ]; then
 	if [ -z "$2" ]; then
-    	echo "Pass the apk directory name!"
-    	echo "./apk build <apk_dir>"
+		echo "Pass the apk directory name!"
+		echo "./apk build <apk_dir>"
 		exit 1
 	fi
-	#	
-	# It seems there is a problem with apktool build and manifest attribute android:dataExtractionRules 
+	#
+	# It seems there is a problem with apktool build and manifest attribute android:dataExtractionRules
 	# 	: /home/ax/AndroidManifest.xml:30: error: attribute android:dataExtractionRules not found.
 	# 	W: error: failed processing manifest.
-	# Temporary workaround: remove the attribute from the Manifest and use Android 9 
+	# Temporary workaround: remove the attribute from the Manifest and use Android 9
 	#
 	# Set android:extractNativeLibs="true" in the Manifest if you experience any adb:
 	# failed to install file.gadget.apk: Failure [INSTALL_FAILED_INVALID_APK: Failed to extract native libraries, res=-2]
@@ -613,8 +613,8 @@ if [ ! -z $1 ]&&[ $1 == "build" ]; then
 
 elif [ ! -z $1 ]&&[ $1 == "decode" ]; then
 	if [ -z "$2" ]; then
-    	echo "Pass the apk name!"
-    	echo "./apk decode <apkname.apk>"
+		echo "Pass the apk name!"
+		echo "./apk decode <apkname.apk>"
 		exit 1
 	fi
 	APK_NAME=$2
@@ -647,8 +647,8 @@ elif [ ! -z $1 ]&&[ $1 == "decode" ]; then
 
 elif [ ! -z $1 ]&&[ $1 == "patch" ]; then
 	if [ -z "$2" ]; then
-    	echo "Pass the apk name and the arch param!"
-    	echo "./apk patch <apkname.apk> --arch arm"
+		echo "Pass the apk name and the arch param!"
+		echo "./apk patch <apkname.apk> --arch arm"
 		echo "[>] Bye!"
 		exit 1
 	fi
@@ -688,7 +688,7 @@ elif [ ! -z $1 ]&&[ $1 == "patch" ]; then
 	done
 	if [ -z "$ARCH" ]; then
 		echo "[!] Pass the --arch param with a supported arch"
-    	echo "./apk patch <apkname.apk> --arch arm"
+		echo "./apk patch <apkname.apk> --arch arm"
 		echo "[>] Bye!"
 		exit 1
 	fi
@@ -720,15 +720,15 @@ elif [ ! -z $1 ]&&[ $1 == "pull" ]; then
 
 elif [ ! -z $1 ]&&[ $1 == "rename" ]; then
 	if [ -z "$2" ]; then
-    	echo "Pass the apk name!"
-    	echo "./apk rename <apkname.apk> <com.package.name>"
+		echo "Pass the apk name!"
+		echo "./apk rename <apkname.apk> <com.package.name>"
 		exit 1
 	fi
 	APK_NAME=$2
 	exit_if_not_exist "$APK_NAME"
 	if [ -z "$3" ]; then
-    	echo "Pass the package name"
-    	echo "./apk rename <apkname.apk> <com.package.name>"
+		echo "Pass the package name"
+		echo "./apk rename <apkname.apk> <com.package.name>"
 		echo "[>] Bye!"
 		exit 1
 	fi
@@ -742,11 +742,11 @@ elif [ ! -z $1 ]&&[ $1 == "rename" ]; then
 
 else
 	echo "[!] First arg must be build, decode, pull, rename or patch!"
-    echo " ./apk.sh pull <package_name>"
+	echo " ./apk.sh pull <package_name>"
 	echo " ./apk.sh decode <apk_file>"
-    echo " ./apk.sh build <apk_dir>"
+	echo " ./apk.sh build <apk_dir>"
 	echo " ./apk.sh patch <apk_file> --arch arm"
-    echo " ./apk.sh rename <apk_file> <package_name>"
+	echo " ./apk.sh rename <apk_file> <package_name>"
 	echo "[>] Bye!"
 	exit 1
 fi
